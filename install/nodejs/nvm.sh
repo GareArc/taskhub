@@ -1,6 +1,9 @@
 #!/bin/bash
 
 set -e
+
+SHELL="zsh"
+
 check_nvm_installed() {
     if command -v nvm &> /dev/null
     then
