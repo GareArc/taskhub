@@ -9,6 +9,7 @@ includes:
 
   # submodules
   nodejs: ./nodejs/Taskfile.yml
+  docker: ./docker/Taskfile.yml
   essentials: ./essentials/Taskfile.yml
 
 tasks:
