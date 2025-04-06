@@ -1,0 +1,50 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  SHARED_ENV_FILE: "{{.ROOT_DIR}}/.shared.env"
+  SCRIPTS_DIR: "{{.ROOT_DIR}}/lib/key-value"
+
+tasks:
+  save:
+    silent: true
+    requires:
+      vars: [KEY, VALUE]
+    cmds:
+      - |
+        pushd {{.SCRIPTS_DIR}} > /dev/null
+        chmod +x ./store_value.sh
+        ./store_value.sh {{.KEY}} "{{.VALUE}}" {{.SHARED_ENV_FILE}}
+        popd > /dev/null
+
+  get:
+    silent: true
+    requires:
+      vars: [KEY]
+    cmds:
+      - |
+        pushd {{.SCRIPTS_DIR}} > /dev/null
+        chmod +x get_value.sh
+        echo $(./get_value.sh {{.KEY}} {{.SHARED_ENV_FILE}})
+        popd > /dev/null
+
+  clean:
+    silent: true
+    cmds:
+      - |
+        pushd {{.SCRIPTS_DIR}} > /dev/null
+        rm -f {{.SHARED_ENV_FILE}}
+        popd > /dev/null
+
+  test:
+    silent: true
+    cmds:
+      - task: save
+        vars:
+          KEY: TEST
+          VALUE: "Hello, World!"
+      - task: get
+        vars:
+          KEY: TEST
+      - defer: { task: clean }

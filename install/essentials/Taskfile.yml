@@ -1,0 +1,40 @@
+# https://taskfile.dev
+
+version: "3"
+
+includes:
+  lib:
+    taskfile: "../../lib/helper.yml"
+    internal: true
+
+  nodejs:
+    taskfile: "../nodejs/Taskfile.yml"
+    internal: true
+
+tasks:
+  default:
+    cmds:
+      - |
+        apt-get update
+        apt-get install -y \
+          git \
+          curl \
+          wget \
+          unzip \
+          tar \
+          tree \
+          cmake \
+          vim
+      - task: nvim:default
+    silent: true
+
+  # install nvim
+  nvim:
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - task: nodejs:default
+      - |
+        chmod +x ./nvim.sh
+        ./nvim.sh
+
+    silent: true

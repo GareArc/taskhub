@@ -1,0 +1,10 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  helper-list-dir-names:
+    silent: true
+    cmds:
+      # list all dir names in current dir
+      - ls -d */ | sed 's/\/$//'

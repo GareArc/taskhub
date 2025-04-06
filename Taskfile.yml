@@ -1,0 +1,29 @@
+# https://taskfile.dev
+
+version: "3"
+
+includes:
+  lib:
+    taskfile: "./lib/helper.yml"
+    internal: true
+  store:
+    taskfile: "./lib/key-value"
+    # internal: true
+
+  install: ./install/Taskfile.yml
+
+dotenv:
+  - .env
+
+tasks:
+  default:
+    silent: true
+    cmds:
+      - echo "Hello, this is taskhub! Use 'taskhub --list-all' to see all available commands."
+
+  ls:
+    silent: true
+    cmds:
+      - |
+        echo "Listing all available commands:"
+        task --list-all

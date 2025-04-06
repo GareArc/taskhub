@@ -1,0 +1,30 @@
+# https://taskfile.dev
+
+version: "3"
+
+includes:
+  lib:
+    taskfile: "../../lib/helper.yml"
+    internal: true
+
+tasks:
+  default:
+    dir: "{{.TASKFILE_DIR}}"
+    env:
+      NODE_VERSION: "${NODE_VERSION:-lts}"
+    cmds:
+      - |
+        chmod +x ./nvm.sh
+        ./nvm.sh
+    silent: true
+
+  # nvim pre-requisites
+  nvim:
+    cmds:
+      - task: default
+      - |
+        nvm install --lts
+        nvm alias default lts
+        nvm use default
+
+    silent: true

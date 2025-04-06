@@ -1,0 +1,22 @@
+# https://taskfile.dev
+
+version: "3"
+
+includes:
+  lib:
+    taskfile: "../lib/helper.yml"
+    internal: true
+
+  # submodules
+  nodejs: ./nodejs/Taskfile.yml
+  essentials: ./essentials/Taskfile.yml
+
+tasks:
+  default:
+    silent: true
+    dir: "{{.TASKFILE_DIR}}"
+    desc: "List all available commands in install module."
+    cmds:
+      # list all dir names in current dir
+      - echo "Avaliable subcommands:"
+      - task: lib:helper-list-dir-names
