@@ -1,0 +1,18 @@
+# https://taskfile.dev
+
+version: "3"
+
+includes:
+  lib:
+    taskfile: "../../lib/helper.yml"
+    internal: true
+
+tasks:
+  default:
+    dir: "{{.TASKFILE_DIR}}"
+    desc: "Install docker"
+    env:
+      OS: "{{OS}}"
+    cmds:
+      - chmod +x ./docker.sh
+      - ./docker.sh

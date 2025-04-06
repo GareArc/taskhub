@@ -6,9 +6,6 @@ includes:
   lib:
     taskfile: "./lib/helper.yml"
     internal: true
-  store:
-    taskfile: "./lib/key-value"
-    # internal: true
 
   install: ./install/Taskfile.yml
 
