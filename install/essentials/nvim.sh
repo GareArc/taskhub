@@ -2,7 +2,7 @@
 
 set -e
 
-TMP_DIR=$(mktemp -d -t nvim-temp)
+TMP_DIR=$(mktemp -d -t nvim-temp.XXXXXX)
 SHELL="zsh"
 
 # Cleanup trap
@@ -10,9 +10,9 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 get_shell() {
     if [ -n "$BASH_VERSION" ]; then
-        SHELL = "bash"
+        SHELL="bash"
     elif [ -n "$ZSH_VERSION" ]; then
-        SHELL = "zsh"
+        SHELL="zsh"
     else
         echo "unknown shell"
         exit 1
@@ -50,5 +50,4 @@ rm -rf "$NVIM_CONFIG"
 mkdir -p "$NVIM_CONFIG"
 git clone --depth=1 https://github.com/GareArc/nvchad-config "$NVIM_CONFIG"
 
-echo "Neovim installed successfully"
-source "$shell_rc"
+echo "Neovim installed successfully, restart terminal to apply changes."

@@ -1,4 +1,14 @@
-# !/bin/bash
+#!/bin/bash
+
+set -e
+
+SHELL="zsh"
+if [ -n "$NODE_VERSION" ]; then
+    echo "NODE_VERSION is set to $NODE_VERSION"
+else
+    echo "NODE_VERSION is not set, defaulting to 18"
+    NODE_VERSION="18"
+fi
 
 check_nvm_installed() {
     if command -v nvm &> /dev/null
@@ -13,13 +23,18 @@ check_nvm_installed() {
 
 get_shell() {
     if [ -n "$BASH_VERSION" ]; then
-        SHELL = "bash"
+        SHELL="bash"
     elif [ -n "$ZSH_VERSION" ]; then
-        SHELL = "zsh"
+        SHELL="zsh"
     else
         echo "unknown shell"
         exit 1
     fi
+}
+
+install_dependencies() {
+    sudo apt-get update
+    sudo apt-get install -y curl git
 }
 
 get_latest_nvm_version() {
@@ -33,21 +48,21 @@ else
     echo "prepared to install nvm" 
 fi
 
-get_shell || {
-    echo "Unsupported shell detected. Please use bash or zsh."
-    exit 1
-}
+get_shell
+install_dependencies
 
 # install nvm
 echo "Installing nvm..."
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v$(get_latest_nvm_version)/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$(get_latest_nvm_version)/install.sh | bash
 
-# reload shell configuration
-if [ "$SHELL" = "bash" ]; then
-    source ~/.bashrc
-elif [ "$SHELL" = "zsh" ]; then
-    source ~/.zshrc
-fi
+# add nvm to shell configuration
+
+
+# load nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 
 if check_nvm_installed; then
     echo "nvm installed successfully"

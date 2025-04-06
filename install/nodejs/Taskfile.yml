@@ -11,12 +11,11 @@ tasks:
   default:
     dir: "{{.TASKFILE_DIR}}"
     env:
-      NODE_VERSION: "${NODE_VERSION:-lts}"
+      NODE_VERSION: ""
     cmds:
       - |
         chmod +x ./nvm.sh
         ./nvm.sh
-    silent: true
 
   # nvim pre-requisites
   nvim:
@@ -26,5 +25,3 @@ tasks:
         nvm install --lts
         nvm alias default lts
         nvm use default
-
-    silent: true

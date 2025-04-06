@@ -15,8 +15,8 @@ tasks:
   default:
     cmds:
       - |
-        apt-get update
-        apt-get install -y \
+        sudo apt-get update
+        sudo apt-get install -y \
           git \
           curl \
           wget \
@@ -25,8 +25,7 @@ tasks:
           tree \
           cmake \
           vim
-      - task: nvim:default
-    silent: true
+      - task: nvim
 
   # install nvim
   nvim:
@@ -36,5 +35,3 @@ tasks:
       - |
         chmod +x ./nvim.sh
         ./nvim.sh
-
-    silent: true
