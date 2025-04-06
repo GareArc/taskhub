@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 check_nvm_installed() {
     if command -v nvm &> /dev/null
     then
@@ -43,7 +44,7 @@ install_dependencies
 
 # install nvm
 echo "Installing nvm..."
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v$(get_latest_nvm_version)/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$(get_latest_nvm_version)/install.sh | bash
 
 # reload shell configuration
 if [ "$SHELL" = "bash" ]; then
