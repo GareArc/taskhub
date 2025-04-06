@@ -56,17 +56,13 @@ echo "Installing nvm..."
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$(get_latest_nvm_version)/install.sh | bash
 
 # add nvm to shell configuration
-echo "Adding nvm to shell configuration..."
-echo "export NVM_DIR=\"$HOME/.nvm\"" >> ~/.${SHELL}rc
-echo "[ -s \"$NVM_DIR/nvm.sh\" ] && \\. \"$NVM_DIR/nvm.sh\"" >> ~/.${SHELL}rc
-echo "[ -s \"$NVM_DIR/bash_completion\" ] && \\. \"$NVM_DIR/bash_completion\"" >> ~/.${SHELL}rc
 
-# reload shell configuration
-if [ "$SHELL" = "bash" ]; then
-    source ~/.bashrc
-elif [ "$SHELL" = "zsh" ]; then
-    source ~/.zshrc
-fi
+
+# load nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 
 if check_nvm_installed; then
     echo "nvm installed successfully"
