@@ -3,6 +3,12 @@
 set -e
 
 SHELL="zsh"
+if [ -n "$NODE_VERSION" ]; then
+    echo "NODE_VERSION is set to $NODE_VERSION"
+else
+    echo "NODE_VERSION is not set, defaulting to 18"
+    NODE_VERSION="18"
+fi
 
 check_nvm_installed() {
     if command -v nvm &> /dev/null

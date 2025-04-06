@@ -26,7 +26,6 @@ tasks:
           cmake \
           vim
       - task: nvim
-    silent: true
 
   # install nvim
   nvim:
@@ -36,5 +35,3 @@ tasks:
       - |
         chmod +x ./nvim.sh
         ./nvim.sh
-
-    silent: true
