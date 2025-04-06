@@ -50,7 +50,7 @@ install_on_darwin() {
     exit 1
 }
 
-vierify_installation() {
+verify_installation() {
     # Verify that Docker is installed correctly by running the hello-world image
     sudo docker run hello-world
 }
