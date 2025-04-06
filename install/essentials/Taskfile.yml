@@ -15,8 +15,8 @@ tasks:
   default:
     cmds:
       - |
-        apt-get update
-        apt-get install -y \
+        sudo apt-get update
+        suod apt-get install -y \
           git \
           curl \
           wget \

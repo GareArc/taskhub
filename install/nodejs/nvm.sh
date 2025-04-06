@@ -22,6 +22,11 @@ get_shell() {
     fi
 }
 
+install_dependencies() {
+    sudo apt-get update
+    sudo apt-get install -y curl git
+}
+
 get_latest_nvm_version() {
     curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")'
 }
@@ -33,10 +38,8 @@ else
     echo "prepared to install nvm" 
 fi
 
-get_shell || {
-    echo "Unsupported shell detected. Please use bash or zsh."
-    exit 1
-}
+get_shell
+install_dependencies
 
 # install nvm
 echo "Installing nvm..."
