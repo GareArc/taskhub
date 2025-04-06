@@ -1,4 +1,4 @@
-# !/bin/bash
+#!/bin/bash
 
 check_nvm_installed() {
     if command -v nvm &> /dev/null
