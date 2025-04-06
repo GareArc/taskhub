@@ -50,5 +50,4 @@ rm -rf "$NVIM_CONFIG"
 mkdir -p "$NVIM_CONFIG"
 git clone --depth=1 https://github.com/GareArc/nvchad-config "$NVIM_CONFIG"
 
-echo "Neovim installed successfully"
-source "$shell_rc"
+echo "Neovim installed successfully, restart terminal to apply changes."
