@@ -10,9 +10,9 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 get_shell() {
     if [ -n "$BASH_VERSION" ]; then
-        SHELL = "bash"
+        SHELL="bash"
     elif [ -n "$ZSH_VERSION" ]; then
-        SHELL = "zsh"
+        SHELL="zsh"
     else
         echo "unknown shell"
         exit 1
