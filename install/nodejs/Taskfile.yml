@@ -16,7 +16,7 @@ tasks:
       - |
         chmod +x ./nvm.sh
         ./nvm.sh
-    silent: true
+    # silent: true
 
   # nvim pre-requisites
   nvim:
@@ -27,4 +27,4 @@ tasks:
         nvm alias default lts
         nvm use default
 
-    silent: true
+    # silent: false
