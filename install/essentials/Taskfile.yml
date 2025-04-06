@@ -25,7 +25,7 @@ tasks:
           tree \
           cmake \
           vim
-      - task: nvim:default
+      - task: nvim
     silent: true
 
   # install nvim
