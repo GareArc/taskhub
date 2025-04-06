@@ -2,7 +2,7 @@
 
 set -e
 
-TMP_DIR=$(mktemp -d -t nvim-temp)
+TMP_DIR=$(mktemp -d -t nvim-temp.XXXXXX)
 SHELL="zsh"
 
 # Cleanup trap
