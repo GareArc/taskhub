@@ -11,7 +11,7 @@ tasks:
   default:
     dir: "{{.TASKFILE_DIR}}"
     env:
-      NODE_VERSION: "${NODE_VERSION:-lts}"
+      NODE_VERSION: "lts"
     cmds:
       - |
         chmod +x ./nvm.sh
