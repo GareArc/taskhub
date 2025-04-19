@@ -1,0 +1,20 @@
+# https://taskfile.dev
+
+version: "3"
+
+includes:
+  lib:
+    taskfile: "../../lib/helper.yml"
+    internal: true
+
+tasks:
+  default:
+    dir: "{{.TASKFILE_DIR}}"
+    desc: "Install clash"
+    interactive: true
+    env:
+      OS: "{{OS}}"
+      CLASH_LOCAL_ARCHIVE: "NOT_SET"
+    cmds:
+      - chmod +x ./clash.sh
+      - ./clash.sh
