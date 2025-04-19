@@ -10,10 +10,11 @@ includes:
 tasks:
   default:
     dir: "{{.TASKFILE_DIR}}"
-    desc: "Install xray"
+    desc: "Install clash"
     interactive: true
     env:
       OS: "{{OS}}"
+      CLASH_LOCAL_ARCHIVE: "NOT_SET"
     cmds:
-      - chmod +x ./xray_client.sh
-      - sudo ./xray_client.sh
+      - chmod +x ./clash.sh
+      - sudo ./clash.sh

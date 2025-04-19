@@ -10,6 +10,8 @@ includes:
   # submodules
   nodejs: ./nodejs/Taskfile.yml
   docker: ./docker/Taskfile.yml
+  clash: ./clash/Taskfile.yml
+  xray: ./xray/Taskfile.yml
   essentials: ./essentials/Taskfile.yml
 
 tasks:
