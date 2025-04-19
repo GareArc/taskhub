@@ -15,6 +15,7 @@ tasks:
     env:
       OS: "{{OS}}"
       CLASH_LOCAL_ARCHIVE: "NOT_SET"
+      LOCAL_INSTALL: "false"
     cmds:
       - chmod +x ./clash.sh
       - sudo ./clash.sh
