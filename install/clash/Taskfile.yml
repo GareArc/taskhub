@@ -17,4 +17,4 @@ tasks:
       CLASH_LOCAL_ARCHIVE: "NOT_SET"
     cmds:
       - chmod +x ./clash.sh
-      - ./clash.sh
+      - sudo ./clash.sh

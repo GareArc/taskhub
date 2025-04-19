@@ -16,4 +16,4 @@ tasks:
       OS: "{{OS}}"
     cmds:
       - chmod +x ./xray_client.sh
-      - ./xray_client.sh
+      - sudo ./xray_client.sh

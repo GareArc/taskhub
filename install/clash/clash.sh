@@ -25,7 +25,7 @@ check_root() {
     fi
 }
 
-# 安装Clash（支持离线）
+# 安装Clash（修复文件名问题）
 install_clash() {
     echo -e "${BLUE}正在安装Clash...${NC}"
     mkdir -p "$CLASH_DIR"
@@ -34,12 +34,41 @@ install_clash() {
     echo -e "${YELLOW}尝试在线下载Clash...${NC}"
     if curl -L "$CLASH_URL" -o "$LOCAL_CLASH_ARCHIVE" --progress-bar; then
         echo -e "${GREEN}下载成功，正在解压...${NC}"
-        tar -xzf "$LOCAL_CLASH_ARCHIVE" -C "$CLASH_DIR"
-        rm -f "$LOCAL_CLASH_ARCHIVE"
+        # 解压到临时目录
+        TEMP_DIR=$(mktemp -d)
+        tar -xzf "$LOCAL_CLASH_ARCHIVE" -C "$TEMP_DIR"
+        
+        # 重命名CrashCore为clash
+        if [ -f "$TEMP_DIR/CrashCore" ]; then
+            mv "$TEMP_DIR/CrashCore" "$CLASH_BIN"
+            echo -e "${GREEN}已重命名 CrashCore → clash${NC}"
+        elif [ -f "$TEMP_DIR/clash" ]; then
+            mv "$TEMP_DIR/clash" "$CLASH_BIN"
+        else
+            echo -e "${RED}错误：压缩包中未找到可执行文件${NC}"
+            rm -rf "$TEMP_DIR"
+            return 1
+        fi
+        
+        rm -rf "$TEMP_DIR" "$LOCAL_CLASH_ARCHIVE"
     else
         echo -e "${YELLOW}在线下载失败，尝试使用本地文件: $LOCAL_CLASH_ARCHIVE${NC}"
         if [ -f "$LOCAL_CLASH_ARCHIVE" ]; then
-            tar -xzf "$LOCAL_CLASH_ARCHIVE" -C "$CLASH_DIR"
+            TEMP_DIR=$(mktemp -d)
+            tar -xzf "$LOCAL_CLASH_ARCHIVE" -C "$TEMP_DIR"
+            
+            if [ -f "$TEMP_DIR/CrashCore" ]; then
+                mv "$TEMP_DIR/CrashCore" "$CLASH_BIN"
+                echo -e "${GREEN}已重命名 CrashCore → clash${NC}"
+            elif [ -f "$TEMP_DIR/clash" ]; then
+                mv "$TEMP_DIR/clash" "$CLASH_BIN"
+            else
+                echo -e "${RED}错误：本地压缩包中未找到可执行文件${NC}"
+                rm -rf "$TEMP_DIR"
+                return 1
+            fi
+            
+            rm -rf "$TEMP_DIR"
             echo -e "${GREEN}使用本地文件安装成功${NC}"
         else
             echo -e "${RED}错误：无法获取Clash安装包，请检查网络或设置CLASH_LOCAL_ARCHIVE环境变量${NC}"
@@ -86,6 +115,12 @@ run_clash() {
     nohup "$CLASH_BIN" -d "$CLASH_DIR" > "$CLASH_DIR/clash.log" 2>&1 &
     echo -e "${GREEN}Clash 已启动 (PID: $!)${NC}"
     echo -e "${YELLOW}日志文件: $CLASH_DIR/clash.log${NC}"
+
+    # 提醒export环境变量
+    echo -e "${YELLOW}请确保将以下环境变量添加到~/.bashrc或~/.bash_profile中:${NC}"
+    echo -e "${YELLOW}export http_proxy=xxx:xxxx${NC}"
+    echo -e "${YELLOW}export https_proxy=xxx:xxxx${NC}"
+    
 }
 
 # 停止Clash
@@ -110,6 +145,14 @@ status_clash() {
         echo -e "${GREEN}Clash 正在运行${NC}"
     else
         echo -e "${RED}Clash 未运行${NC}"
+    fi
+
+    # 打开配置文件
+    if [ -f "$CONFIG_FILE" ]; then
+        echo -e "${BLUE}当前配置文件: ${NC}$CONFIG_FILE"
+        vim "$CONFIG_FILE"
+    else
+        echo -e "${RED}配置文件不存在${NC}"
     fi
 }
 
