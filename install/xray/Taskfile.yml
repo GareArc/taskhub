@@ -1,0 +1,19 @@
+# https://taskfile.dev
+
+version: "3"
+
+includes:
+  lib:
+    taskfile: "../../lib/helper.yml"
+    internal: true
+
+tasks:
+  default:
+    dir: "{{.TASKFILE_DIR}}"
+    desc: "Install xray"
+    interactive: true
+    env:
+      OS: "{{OS}}"
+    cmds:
+      - chmod +x ./xray_client.sh
+      - ./xray_client.sh
