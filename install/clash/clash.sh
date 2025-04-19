@@ -1,21 +1,24 @@
 #!/bin/bash
 
-# Clash 简易管理脚本
-# 功能：下载订阅配置并运行Clash
+# Clash 系统服务管理脚本
+# 使用 systemd 服务管理，更稳定可靠
 
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # 配置参数
+LOCAL_INSTALL="${LOCAL_INSTALL:-false}" # 是否使用本地安装
 CLASH_URL="https://github.com/DustinWin/proxy-tools/releases/download/Clash-Premium/clashpremium-release-linux-amd64.tar.gz"
-CLASH_DIR="/opt/clash"
+CLASH_DIR="/usr/local/clash"
 CLASH_BIN="$CLASH_DIR/clash"
 CONFIG_FILE="$CLASH_DIR/config.yaml"
-LOCAL_CLASH_ARCHIVE="${CLASH_LOCAL_ARCHIVE}" # 环境变量指定本地包路径
+SERVICE_FILE="/etc/systemd/system/clash.service"
+LOCAL_CLASH_ARCHIVE="${CLASH_LOCAL_ARCHIVE:-/tmp/clash.tar.gz}"
 
 # 检查root权限
 check_root() {
@@ -25,20 +28,19 @@ check_root() {
     fi
 }
 
-# 安装Clash（修复文件名问题）
+# 安装Clash
 install_clash() {
     echo -e "${BLUE}正在安装Clash...${NC}"
     mkdir -p "$CLASH_DIR"
     
     # 在线下载
     echo -e "${YELLOW}尝试在线下载Clash...${NC}"
-    if curl -L "$CLASH_URL" -o "$LOCAL_CLASH_ARCHIVE" --progress-bar; then
+    if [ "$LOCAL_INSTALL" = "false" ]; then
+        curl -L "$CLASH_URL" -o "$LOCAL_CLASH_ARCHIVE" --progress-bar
         echo -e "${GREEN}下载成功，正在解压...${NC}"
-        # 解压到临时目录
         TEMP_DIR=$(mktemp -d)
         tar -xzf "$LOCAL_CLASH_ARCHIVE" -C "$TEMP_DIR"
         
-        # 重命名CrashCore为clash
         if [ -f "$TEMP_DIR/CrashCore" ]; then
             mv "$TEMP_DIR/CrashCore" "$CLASH_BIN"
             echo -e "${GREEN}已重命名 CrashCore → clash${NC}"
@@ -71,13 +73,61 @@ install_clash() {
             rm -rf "$TEMP_DIR"
             echo -e "${GREEN}使用本地文件安装成功${NC}"
         else
-            echo -e "${RED}错误：无法获取Clash安装包，请检查网络或设置CLASH_LOCAL_ARCHIVE环境变量${NC}"
+            echo -e "${RED}错误：无法获取Clash安装包${NC}"
             return 1
         fi
     fi
     
     chmod +x "$CLASH_BIN"
-    echo -e "${GREEN}Clash 已安装到 $CLASH_DIR${NC}"
+    
+    # 创建systemd服务
+    cat > "$SERVICE_FILE" <<EOF
+[Unit]
+Description=Clash Proxy Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=$CLASH_BIN -d $CLASH_DIR
+Restart=always
+RestartSec=3
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # 验证服务文件创建
+    if [ ! -f "$SERVICE_FILE" ]; then
+        echo -e "${RED}错误：服务文件创建失败 $SERVICE_FILE${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}服务文件创建成功${NC}"
+    chmod 644 "$SERVICE_FILE"
+    
+    # 重载systemd并验证
+    echo -e "${YELLOW}重载systemd配置...${NC}"
+    if ! systemctl daemon-reload; then
+        echo -e "${RED}systemd重载失败！${NC}"
+        return 1
+    fi
+    
+    # 验证服务是否注册
+    if ! systemctl list-unit-files | grep -q clash.service; then
+        echo -e "${RED}错误：服务未正确注册！${NC}"
+        echo -e "${YELLOW}尝试手动重载：${NC}"
+        echo "1. sudo systemctl daemon-reload"
+        echo "2. sudo systemctl reset-failed"
+        return 1
+    fi
+
+    echo -e "${GREEN}Clash 已安装并配置为系统服务${NC}"
+    echo -e "${YELLOW}使用以下命令控制：${NC}"
+    echo "启动服务：sudo systemctl start clash"
+    echo "开机启动：sudo systemctl enable clash"
 }
 
 # 从订阅链接更新配置
@@ -96,82 +146,86 @@ update_config() {
     echo -e "${BLUE}正在下载配置文件...${NC}"
     if wget -q -O "$CONFIG_FILE" "$sub_url"; then
         echo -e "${GREEN}配置文件已更新: $CONFIG_FILE${NC}"
+        # 重启服务使配置生效
+        systemctl restart clash
     else
         echo -e "${RED}下载配置文件失败!${NC}"
         return 1
     fi
 }
 
-# 运行Clash
-run_clash() {
-    if [ ! -f "$CONFIG_FILE" ]; then
-        echo -e "${RED}错误：配置文件不存在，请先更新配置!${NC}"
+# 服务状态检查
+service_status() {
+    # 先检查服务文件是否存在
+    if [ ! -f "$SERVICE_FILE" ]; then
+        echo -e "${RED}错误：服务文件不存在 (请先安装)${NC}"
         return 1
     fi
     
-    stop_clash 2>/dev/null
+    # 检查服务是否加载
+    if ! systemctl list-unit-files | grep -q clash.service; then
+        echo -e "${RED}服务未加载，尝试执行：${NC}"
+        echo -e "sudo systemctl daemon-reload"
+        return 1
+    fi
     
-    echo -e "${BLUE}正在启动Clash...${NC}"
-    nohup "$CLASH_BIN" -d "$CLASH_DIR" > "$CLASH_DIR/clash.log" 2>&1 &
-    echo -e "${GREEN}Clash 已启动 (PID: $!)${NC}"
-    echo -e "${YELLOW}日志文件: $CLASH_DIR/clash.log${NC}"
-
-    # 提醒export环境变量
-    echo -e "${YELLOW}请确保将以下环境变量添加到~/.bashrc或~/.bash_profile中:${NC}"
-    echo -e "${YELLOW}export http_proxy=xxx:xxxx${NC}"
-    echo -e "${YELLOW}export https_proxy=xxx:xxxx${NC}"
+    # 检查服务状态
+    echo -e "${CYAN}====== 服务状态 ======${NC}"
+    systemctl status clash --no-pager -l || echo -e "${RED}获取状态失败${NC}"
     
-}
-
-# 停止Clash
-stop_clash() {
+    # 检查进程
+    echo -e "\n${CYAN}====== 进程信息 ======${NC}"
     if pgrep -f "$CLASH_BIN" >/dev/null; then
-        pkill -f "$CLASH_BIN"
-        echo -e "${GREEN}Clash 已停止${NC}"
+        echo -e "${GREEN}Clash 进程正在运行${NC}"
+        ps -fp $(pgrep -f "$CLASH_BIN")
     else
-        echo -e "${YELLOW}Clash 未在运行${NC}"
+        echo -e "${RED}未找到运行中的Clash进程${NC}"
+    fi
+    
+    # 检查端口
+    local api_port=$(grep 'external-controller' "$CONFIG_FILE" | awk -F: '{print $NF}')
+    if [ -n "$api_port" ]; then
+        echo -e "\n${CYAN}====== 端口检查 ======${NC}"
+        if ss -tulnp | grep -q ":$api_port"; then
+            echo -e "${GREEN}API 端口 $api_port 正在监听${NC}"
+        else
+            echo -e "${RED}API 端口 $api_port 未监听${NC}"
+        fi
     fi
 }
 
-# 重启Clash
-restart_clash() {
-    stop_clash
-    run_clash
-}
-
-# 检查Clash状态
-status_clash() {
-    if pgrep -f "$CLASH_BIN" >/dev/null; then
-        echo -e "${GREEN}Clash 正在运行${NC}"
-    else
-        echo -e "${RED}Clash 未运行${NC}"
+# 显示配置信息
+show_config() {
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo -e "${RED}配置文件不存在: $CONFIG_FILE${NC}"
+        return 1
     fi
 
-    # 打开配置文件
-    if [ -f "$CONFIG_FILE" ]; then
-        echo -e "${BLUE}当前配置文件: ${NC}$CONFIG_FILE"
-        vim "$CONFIG_FILE"
-    else
-        echo -e "${RED}配置文件不存在${NC}"
-    fi
+    echo -e "${CYAN}======= 基本配置信息 =======${NC}"
+    grep -E '^(mixed-port|socks-port|port|redir-port|mode|log-level|allow-lan|external-controller|secret):' "$CONFIG_FILE"
+
+    echo -e "\n${CYAN}======= 服务状态 =======${NC}"
+    service_status
 }
 
 # 显示菜单
 show_menu() {
     clear
     echo -e "${BLUE}==============================${NC}"
-    echo -e "${GREEN}      Clash 简易管理脚本     ${NC}"
+    echo -e "${GREEN}     Clash 系统服务管理脚本    ${NC}"
     echo -e "${BLUE}==============================${NC}"
     echo -e "1. 安装/更新 Clash"
     echo -e "2. 更新配置文件 (从订阅链接)"
-    echo -e "3. 启动 Clash"
-    echo -e "4. 停止 Clash"
-    echo -e "5. 重启 Clash"
-    echo -e "6. 查看 Clash 状态"
-    echo -e "7. 一键安装+更新配置+启动"
+    echo -e "3. 启动 Clash 服务"
+    echo -e "4. 停止 Clash 服务"
+    echo -e "5. 重启 Clash 服务"
+    echo -e "6. 查看服务状态"
+    echo -e "7. 查看配置信息"
+    echo -e "8. 设置开机启动"
+    echo -e "9. 禁用开机启动"
+    echo -e "10. 一键安装+更新配置+启动"
     echo -e "0. 退出"
     echo -e "${BLUE}==============================${NC}"
-    echo -e "${YELLOW}提示: 设置CLASH_LOCAL_ARCHIVE环境变量可指定本地安装包${NC}"
 }
 
 # 主函数
@@ -180,21 +234,24 @@ main() {
     
     while true; do
         show_menu
-        read -p "请输入选项 [0-7]: " option
+        read -p "请输入选项 [0-10]: " option
         case $option in
             1) install_clash ;;
             2) update_config ;;
-            3) run_clash ;;
-            4) stop_clash ;;
-            5) restart_clash ;;
-            6) status_clash ;;
-            7) 
+            3) systemctl start clash ;;
+            4) systemctl stop clash ;;
+            5) systemctl restart clash ;;
+            6) service_status ;;
+            7) show_config ;;
+            8) systemctl enable clash ;;
+            9) systemctl disable clash ;;
+            10) 
                 install_clash && \
                 update_config && \
-                run_clash
+                systemctl start clash
                 ;;
             0) 
-                echo -e "${GREEN}再见!${NC}"
+                echo -e "${GREEN}操作完成，再见!${NC}"
                 exit 0
                 ;;
             *) 
