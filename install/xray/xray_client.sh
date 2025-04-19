@@ -114,6 +114,8 @@ EOF
     systemctl daemon-reload
     echo -e "${GREEN}Xray 安装完成！${NC}"
     echo -e "${CYAN}配置文件路径：$CONFIG_FILE${NC}"
+
+    echo -e "${YELLOW}您可以把订阅链接放到V2rayN后导出配置，直接覆盖就可以~${NC}"
 }
 
 # 卸载 Xray
@@ -135,7 +137,10 @@ show_config() {
         echo -e "${YELLOW}当前配置文件地址：${NC}"
         echo -e "${GREEN}$CONFIG_FILE${NC}"
     else
-        echo -e "${RED}错误：配置文件不存在！${NC}"
+        echo -e "${RED}错误：配置文件不存在！手动创建中...${NC}"
+        touch "$CONFIG_FILE"
+        echo -e "${YELLOW}请手动编辑配置文件：${NC}"
+        vim "$CONFIG_FILE"
     fi
 }
 
