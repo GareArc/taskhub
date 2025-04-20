@@ -25,6 +25,7 @@ tasks:
           tree \
           cmake \
           vim
+      - task: oh-my-zsh
       - task: nvim
 
   # install nvim
@@ -35,3 +36,11 @@ tasks:
       - |
         chmod +x ./nvim.sh
         ./nvim.sh
+
+  # install oh-my-zsh
+  oh-my-zsh:
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - |
+        chmod +x ./oh-my-zsh.sh
+        ./oh-my-zsh.sh
