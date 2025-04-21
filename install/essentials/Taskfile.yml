@@ -24,7 +24,8 @@ tasks:
           tar \
           tree \
           cmake \
-          vim
+          vim \
+          git-lfs
       - task: oh-my-zsh
       - task: nvim
 
