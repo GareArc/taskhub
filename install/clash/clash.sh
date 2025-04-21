@@ -19,6 +19,9 @@ CLASH_BIN="$CLASH_DIR/clash"
 CONFIG_FILE="$CLASH_DIR/config.yaml"
 SERVICE_FILE="/etc/systemd/system/clash.service"
 LOCAL_CLASH_ARCHIVE="${CLASH_LOCAL_ARCHIVE:-clash-linux-amd64.gz}"
+LOCAL_MMDB_PATH="${LOCAL_MMDB_PATH:-Country.mmdb}"
+
+git lfs pull
 
 # 检查root权限
 check_root() {
@@ -122,6 +125,11 @@ EOF
         echo "1. sudo systemctl daemon-reload"
         echo "2. sudo systemctl reset-failed"
         return 1
+    fi
+
+    # 复制mmdb文件
+    if [ -f "$LOCAL_MMDB_PATH" ]; then
+        cp "$LOCAL_MMDB_PATH" "$CLASH_DIR/Country.mmdb"    
     fi
 
     echo -e "${GREEN}Clash 已安装并配置为系统服务${NC}"

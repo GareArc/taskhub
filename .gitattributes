@@ -1,1 +1,2 @@
 install/clash/clash-linux-amd64.gz filter=lfs diff=lfs merge=lfs -text
+install/clash/Country.mmdb filter=lfs diff=lfs merge=lfs -text
