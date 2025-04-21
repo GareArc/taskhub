@@ -18,7 +18,7 @@ CLASH_DIR="/usr/local/clash"
 CLASH_BIN="$CLASH_DIR/clash"
 CONFIG_FILE="$CLASH_DIR/config.yaml"
 SERVICE_FILE="/etc/systemd/system/clash.service"
-LOCAL_CLASH_ARCHIVE="${CLASH_LOCAL_ARCHIVE:-/tmp/clash.tar.gz}"
+LOCAL_CLASH_ARCHIVE="${CLASH_LOCAL_ARCHIVE:-clash-linux-amd64.gz}"
 
 # 检查root权限
 check_root() {
